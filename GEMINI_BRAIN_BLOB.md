@@ -19,13 +19,13 @@ The watch achieves multi-day battery by suspending the MT6765 (Suspend-to-RAM). 
 
 ## 4. THE 32MB TWRP WALL & OFFSETS
 The recovery partition is strictly 32MB. With a ~25.8MB kernel, ramdisk compression (LZMA) and strict bloat removal are mandatory.
-*   **Kernel Offset:** `0x00008000` (The "Secret Zero" alignment for MT6765 VCOM jump).
-*   **Tags Offset:** `0x07880000`.
+*   **Kernel Offset:** `0x00080000` (Verified Solid).
+*   **Tags Offset:** `0x07880000` (Verified Solid).
 *   **Header Version:** 2.
 *   **Display Node:** `nt35695B_fhd_dsi_cmd_auo_rt5081_drv`.
 *   **Touch Node:** `cap_touch@5d` (I2C 0x5D).
 
-## 1. ESSENTIAL VENDOR PRESERVATION LIST (FOR AOSP 12)
+## 5. ESSENTIAL VENDOR PRESERVATION LIST (FOR AOSP 12)
 To keep the hardware alive on a vanilla build, these blobs MUST be imported and linked via `manifest.xml`:
 *   **Display:** `hwcomposer.mt6765.so`, `gralloc.mt6765.so`, `libged.so`.
 *   **Sensors/MCU:** `vendor.topwise.hardware.mcu@1.0-service`, `sensors.mt6765.so`, `McuControlService.apk` (or custom shim script).
@@ -37,3 +37,15 @@ To keep the hardware alive on a vanilla build, these blobs MUST be imported and 
 2.  **Double Verification:** Every offset, path, and partition size must be verified against live device checks before flashing.
 3.  **Pre-Flight Diff Only:** Gemini will never execute a modifying shell command (`rm`, `write`, `cp`) without explicit user "Execute" approval.
 4.  **11-on-10 Bridge:** Use `linker.config.json` to bridge Android 10 vendor blobs into the Android 11/12 environment to prevent duplicate module definitions.
+
+## 7. FINAL VERIFICATION SUCCESS (READY TO FLASH)
+- **Ported Image:** `~/Downloads/twrp_ported_verified.img`.
+- **Binary DNA:** Kernel/DTB/DTBO hashes match stock bit-for-bit.
+- **Offsets (Solid):** Kernel `0x00080000`, Ramdisk `0x11b00000`, Tags `0x07880000`, Header v2.
+- **Resolution:** Patch confirmed at 160 DPI (480x640).
+- **Fstab:** Logical partitions mapped to `mediatek_dynamic_partitions`.
+
+## 8. PENDING ACTION: THE SOLID FLASH
+- **Tool:** `mtkclient` at `/home/albert/mtkclient/mtk.py`.
+- **Command:** `sudo python3 /home/albert/mtkclient/mtk.py w recovery ~/Downloads/twrp_ported_verified.img para ~/Downloads/recovery_flag.bin`
+- **Logic:** Flash TWRP + set `para` flag for direct recovery boot.
