@@ -25,7 +25,7 @@ The recovery partition is strictly 32MB. With a ~25.8MB kernel, ramdisk compress
 *   **Display Node:** `nt35695B_fhd_dsi_cmd_auo_rt5081_drv`.
 *   **Touch Node:** `cap_touch@5d` (I2C 0x5D).
 
-## 5. ESSENTIAL VENDOR PRESERVATION LIST (FOR AOSP 12)
+## 1. ESSENTIAL VENDOR PRESERVATION LIST (FOR AOSP 12)
 To keep the hardware alive on a vanilla build, these blobs MUST be imported and linked via `manifest.xml`:
 *   **Display:** `hwcomposer.mt6765.so`, `gralloc.mt6765.so`, `libged.so`.
 *   **Sensors/MCU:** `vendor.topwise.hardware.mcu@1.0-service`, `sensors.mt6765.so`, `McuControlService.apk` (or custom shim script).
