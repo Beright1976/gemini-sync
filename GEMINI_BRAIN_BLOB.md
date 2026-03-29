@@ -42,14 +42,25 @@ To keep the hardware alive on a vanilla build, these blobs MUST be imported and 
 3.  **Pre-Flight Diff Only:** Gemini will never execute a modifying shell command (`rm`, `write`, `cp`) without explicit user "Execute" approval.
 4.  **11-on-10 Bridge:** Use `linker.config.json` to bridge Android 10 vendor blobs into the Android 11/12 environment to prevent duplicate module definitions.
 
-## 7. FINAL VERIFICATION SUCCESS (READY TO FLASH)
+## 7. FINAL VERIFICATION SUCCESS (IMAGE GENERATED)
 - **Final Production Image:** `~/Downloads/full_twrp_lokmat_5.img`.
 - **Image Size:** 32,768 KB (Exactly matched to partition map).
 - **DNA Match:** Kernel (Gzip 8.8MB), DTB (88KB), Ramdisk (LZMA).
 - **Resolution:** HDPI (320 DPI / 480x640) - 100% Visual Fidelity.
-- **Decryption:** AIDL/HIDL stubs verified; Keystore 4.0/Gatekeeper blobs included.
 
-## 8. PENDING ACTION: THE SOLID FLASH
+## 8. FORENSIC AUDIT FAILURE (POST-BUILD ANALYSIS)
+- **Status:** BUILD SUCCESS / AUDIT FAILED.
+- **Issue:** Critical Decryption Blobs (`libkeymaster4.so`, `keymaster-4-0-service`) missing from ramdisk despite `PRODUCT_PACKAGES` entries.
+- **Root Cause:** Android 11 recovery build system ignored `PRODUCT_PACKAGES` for the ramdisk target. 
+- **Lessons Learned:**
+    1. **Kernel Compression:** Gzip (8.8MB) is mandatory to fit Header V2 + Full Decryption stack.
+    2. **Rsync Collision:** `recovery/root/vendor` MUST be a symlink; any `PRODUCT_COPY_FILES` targeting it directly will break the build.
+    3. **VTS/AIDL Mocks:** `VtsDummy` must include `cpp_header` for AIDL stubs to compile.
+    4. **Force Inclusion:** Next build MUST use explicit `PRODUCT_COPY_FILES` for security blobs to guarantee presence.
+
+- **Next Step:** Wipe `out/` and rebuild from a clean tree using "Forensic Inclusion" for all crypto blobs.
+
+## 9. PENDING ACTION: THE SOLID FLASH
 - **Tool:** `mtkclient` at `/home/albert/mtkclient/mtk.py`.
 - **Command:** `sudo python3 /home/albert/mtkclient/mtk.py w recovery ~/Downloads/full_twrp_lokmat_5.img para ~/Downloads/recovery_flag.bin`
 - **Logic:** Flash TWRP + set `para` flag for direct recovery boot (Prevents stock recovery overwrite).
